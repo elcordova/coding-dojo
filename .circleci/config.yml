@@ -1,0 +1,40 @@
+version: 2.1
+jobs:
+  run-tests:
+    docker:
+      - image: rolandjitsu/gcloud-node
+    working_directory: ~/kataIdukay
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: 
+          name: Install dependencies
+          command: npm install
+      - run: 
+          name: Tests
+          command: npm run test
+
+  deploy:
+    docker:
+      - image: wecs/circle-ci-gcloud-node:0.1.0
+    working_directory: ~/kataIdukay
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: 
+          name: Deploy
+          command: ./deployment.sh
+workflows:
+  version: 2
+  build:
+    jobs:
+      - run-tests:
+          filters:
+            branches:
+              only: development
+      - deploy:
+          requires:
+              - run-tests
+          filters:
+            branches:
+              only: development
